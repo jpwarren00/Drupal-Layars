@@ -13,4 +13,11 @@
    return $schema;
  }
 
+ function drupal_layar_install() {
+
+ }
+
+ function drupal_layar_uninstall() {
+
+ }
 ?>

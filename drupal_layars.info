@@ -1,6 +1,5 @@
-<?php
-/* 
- *
- */
-
-?>
+; $Id$
+name = Drupal Layars
+description = Implements the Layar API for Drupal
+package = Augmented Reality
+core = 6.x
