@@ -1,0 +1,16 @@
+<?php
+/* 
+ * 
+ */
+
+/**
+ * Database tables for Layar.
+ *
+ * @return array
+ */
+ function layar_schema() {
+   $schema['layar'] = array();
+   return $schema;
+ }
+
+?>
