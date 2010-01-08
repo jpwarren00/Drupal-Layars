@@ -1,26 +1,101 @@
 <?php
-//$Id$
+  //$Id$
 
-/* 
- * @file
- * Provides a content type that publishes nodes to Layar for display through
- * augmented reality apps.
- */
+  /*
+   * @file
+   * Provides a content type that publishes nodes to Layar for display through
+   * augmented reality apps.
+   */
 
-function layar_node_info() {
-  return array(
-    'layar_node' => array(
-      'name' => t('Layar Node'),
-      'module' => 'drupal_layars',
-      'description' => t('Implementation of a content type in Drupal that publishes to Layar.'),
-      'has_title' => TRUE,
-      'title_label' => t('Title'),
-      'has_body' => TRUE,
-      'body_label' => t('Body'),
-      'min_word_count' => 2,
-      'locked' => FALSE,
-    )
-  );
-}
+  /**
+   * Register the node type with Drupal
+   * @return array
+   */
+  function drupal_layars_node_info() {
+    return array(
+      'layar_node' => array(
+        'name' => t('Layar Node'),
+        'module' => 'drupal_layars',
+        'description' => t('Implementation of a content type in Drupal that publishes to Layar.'),
+        'has_title' => TRUE,
+        'title_label' => t('Title'),
+        'has_body' => TRUE,
+        'body_label' => t('Body'),
+        'min_word_count' => 2,
+        'locked' => FALSE,
+      )
+    );
+  }
+  
+  /**
+   * Menu alter to prevent users without the administration rights from seeing
+   * the menu item for layar administration.
+   */
+  function drupal_layars_menu_alter(&$callbacks){
+    if  (!user_access('administer layars')) {
+      $callbacks['node/add/layar']['access callback'] = FALSE;
+      unset($callbacks['node/add/layar']['access arguments']);
+    }
+  }
 
+  /**
+   * Hook perm
+   *
+   * @return array
+   */
+  function drupal_layars_perm() {
+    return array('create layar node', 'edit own layar node', 'edit any layar node', 'delete own layar node', 'delete any layar node');
+  }
+
+  /**
+   * Hook access
+   *
+   * @return array
+   */
+  function drupal_layars_access() {
+    $is_reality_wizard = $account->uid == $node->uid;
+    switch ($op) {
+      case 'create':
+        return user_access('create layar node', $account);
+      case 'update':
+        return user_access('edit own layar node', $account) && $is_reality_wizard || user_access('edit any layar node', $account);
+      case 'delete':
+        return user_access('delete own layar node', $account) && $is_reality_wizard || user_access('delete any layar node', $account);
+    }
+  }
+
+  /**
+   * 
+   *
+   * @param object $node
+   * @return array
+   */
+  function drupal_layars_form($node) {
+    $type = node_get_types('type', $node);
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => check_plain($type->title_label),
+      '#required' => TRUE,
+      '#default_value' => $node->title,
+      '#weight' => -5,
+      '#maxlength' => 255,
+    );
+    $form['body_filter']['body'] = array(
+      '#type' => 'textarea',
+      '#title' => check_plain($type->body_label),
+      '#default_value' => $node->body,
+      '#rows' => 10,
+      '#required' => TRUE,
+      '#default_value' => '',
+      '#weight' => 5,
+    );
+    $form['body_filter']['filter'] = filter_form($node->format);
+    $form['punchline'] = array(
+      '#type' => 'textfield',
+      
+    );
+    return $form;
+  }
+
+  
 ?>
